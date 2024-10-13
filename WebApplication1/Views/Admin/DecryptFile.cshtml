@@ -1,0 +1,35 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <title>Decrypt File</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <button id="decryptButton">Decrypt File</button>
+
+    <script>
+        $(document).ready(function () {
+            $('#decryptButton').click(function () {
+                var fileName = prompt("Enter the name of the file to decrypt (without path):");
+                if (fileName) {
+                    $.ajax({
+                        url: '@Url.Action("DecryptFile", "Admin")',
+                        type: 'POST',
+                        data: { fileName: fileName },
+                        success: function (response) {
+                            alert(response.message);
+                            if (response.success) {
+                                // Navigate to the decrypted file
+                                window.location.href = response.decryptedFilePath;
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert("File decryption failed: " + error);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
+</body>
+</html>

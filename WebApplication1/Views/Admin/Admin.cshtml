@@ -1,0 +1,661 @@
+﻿@using System;
+@using System.Collections.Generic;
+@using System.Configuration;
+@using System.Data;
+@using System.Data.SqlClient;
+@using System.IO;
+@using System.Security.Cryptography;
+@using System.Text;
+@using System.Web;
+@{
+    var employee = ViewBag.Employee as TB_EMPLOYEE;
+    var employeeDetails = ViewBag.EmployeeDetails as TB_EMPLOYEE_DETAILS;
+    DataTable dt = new DataTable();
+    int employeeCount = 0;
+    string Sqlconnection = ConfigurationManager.ConnectionStrings["MyDatabaseConnectionString"].ConnectionString;
+    using (SqlConnection conn = new SqlConnection(Sqlconnection))
+    {
+
+        DataSet ds = new DataSet();
+        SqlCommand cmd = new SqlCommand("Sp_TB_EMPLOYEE_GETDATA", conn);
+        cmd.CommandType = CommandType.StoredProcedure;
+        conn.Open();
+        SqlDataAdapter da = new SqlDataAdapter(cmd);
+        da.Fill(ds);
+        dt = ds.Tables[0];
+    }
+    {
+        DataTable dtm = new DataTable();
+
+        using (SqlConnection conn = new SqlConnection(Sqlconnection))
+        {
+            DataSet dsq = new DataSet();
+            SqlCommand cmd = new SqlCommand("select count(*) from tb_employee", conn);
+
+            cmd.CommandType = CommandType.Text;
+            conn.Open();
+            SqlDataAdapter da = new SqlDataAdapter(cmd);
+            da.Fill(dsq);
+            dtm = dsq.Tables[0];
+            if (dsq.Tables.Count > 0 && dsq.Tables[0].Rows.Count > 0)
+            {
+                employeeCount = Convert.ToInt32(dsq.Tables[0].Rows[0][0]);
+            }
+        }
+    } }
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Admin</title>
+    <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
+    <link href="/css/styles.css" rel="stylesheet" />
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+    <style>
+        .hidden-column {
+            display: none;
+        }
+        #datatablesSimple {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+            #datatablesSimple th, #datatablesSimple td {
+                border: 1px solid #ddd;
+                padding: 8px;
+            }
+
+            #datatablesSimple th {
+                padding-top: 12px;
+                padding-bottom: 12px;
+                text-align: left;
+                background-color: #f2f2f2;
+                color: black;
+            }  .btn-custom {
+                    flex: 1;
+                    max-width: 150px;
+                    border-radius: 0;
+                    margin-right: 10px;
+                    padding: 10px 20px;
+                    display: inline-flex;
+                    justify-content: center;
+                    align-items: center;
+                    text-align: center;
+                    box-sizing: border-box;
+                }
+
+    .btn-custom:last-child {
+                    margin-right: 0;
+                }
+    @@media (max-width: 600px) {
+        .btn-custom {
+                        flex: 1 0 100%;
+                        margin-right: 0;
+                        margin-bottom: 10px;
+                    }
+                }
+        .dropdown-item-logout {
+        color:white;
+
+        }
+        .logout-button {
+            color: #ff4d4d; 
+            font-weight: bold;
+            background-color: white;
+            border-radius: 4px;
+            padding: 8px 12px; 
+            transition: background-color 0.3s, color 0.3s; 
+        }
+
+            .logout-button:hover {
+                background-color: #f8d7da; 
+                color: #721c24;
+            }
+    </style>
+</head>
+<body class="sb-nav-fixed">
+    <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+        <!-- Navbar Brand-->
+        <a class="navbar-brand ps-3" href="index.html">Welcome</a>
+        <!-- Sidebar Toggle-->
+        <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+        <!-- Navbar Search-->
+        <form class="d-none d-md-inline-block form-inline ms-auto me-0 me-md-3 my-2 my-md-0">
+            @if (ViewBag.Username != null)
+            {
+                <div class="input-group">
+                    <span class="input-group-text">Welcome, @ViewBag.Username</span>
+                </div>}
+        </form>
+        <!-- Navbar-->
+        <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+            <li>
+                <form action="/Admin/Logout" method="post" style="display:inline;">
+                    @Html.AntiForgeryToken()
+                    <button type="submit" class="dropdown-item logout-button">Logout</button>
+                </form>
+            </li>
+        </ul>
+    </nav>
+    <div id="layoutSidenav">
+        <div id="layoutSidenav_nav">
+            <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+                <div class="sb-sidenav-menu">
+                    <div class="nav">
+                        <div class="sb-sidenav-menu-heading">Core</div>
+                        <a class="nav-link" href="#">
+                            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                            Dashboard
+                        </a>
+                        @*<div class="sb-sidenav-menu-heading">Interface</div>*@
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts" aria-expanded="false" aria-controls="collapseLayouts">
+                            <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                            @*Layouts*@
+                            <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                        </a>
+                        @*<div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                                <nav class="sb-sidenav-menu-nested nav">
+                                    <a class="nav-link" href="layout-static.html">Static Navigation</a>
+                                    <a class="nav-link" href="layout-sidenav-light.html">Light Sidenav</a>
+                                </nav>
+                            </div>*@
+                        <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapsePages" aria-expanded="false" aria-controls="collapsePages">
+                            @*<div class="sb-nav-link-icon"><i class="fas fa-book-open"></i></div>
+                                Pages
+                                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>*@
+                        </a>
+                        <div class="collapse" id="collapsePages" aria-labelledby="headingTwo" data-bs-parent="#sidenavAccordion">
+                            <nav class="sb-sidenav-menu-nested nav accordion" id="sidenavAccordionPages">
+                                @*<a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseAuth" aria-expanded="false" aria-controls="pagesCollapseAuth">
+                                        Authentication
+                                        <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                                    </a>*@
+                                <div class="collapse" id="pagesCollapseAuth" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                                    <nav class="sb-sidenav-menu-nested nav">
+                                        @*<a class="nav-link" href="login.html">Login</a>
+                                            <a class="nav-link" href="register.html">Register</a>
+                                            <a class="nav-link" href="password.html">Forgot Password</a>*@
+                                    </nav>
+                                </div>
+                                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#pagesCollapseError" aria-expanded="false" aria-controls="pagesCollapseError">
+                                    Error
+                                    <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+                                </a>
+                                <div class="collapse" id="pagesCollapseError" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordionPages">
+                                    <nav class="sb-sidenav-menu-nested nav">
+                                        @*<a class="nav-link" href="401.html">401 Page</a>
+                                            <a class="nav-link" href="404.html">404 Page</a>
+                                            <a class="nav-link" href="500.html">500 Page</a>*@
+                                    </nav>
+                                </div>
+                            </nav>
+                        </div>
+                        <div class="sb-sidenav-menu-heading">Addons</div>
+                        @*<a class="nav-link" href="charts.html">
+                                <div class="sb-nav-link-icon"><i class="fas fa-chart-area"></i></div>
+                                Charts
+                            </a>
+                            <a class="nav-link" href="tables.html">
+                                <div class="sb-nav-link-icon"><i class="fas fa-table"></i></div>
+                                Tables
+                            </a>*@
+                    </div>
+                </div>
+                <div class="sb-sidenav-footer">
+                    <div class="small"></div>
+
+                </div>
+            </nav>
+        </div>
+        <div id="layoutSidenav_content">
+            <main>
+                <div class="container-fluid px-4">
+                    <h1 class="mt-4">Dashboard</h1>
+                    <ol class="breadcrumb mb-4">
+                        <li class="breadcrumb-item active">
+                            <div class="col-12 col-md-auto">
+                                <button class="btn btn-outline-primary w-100 w-md-auto" data-toggle="modal" data-target="#addCustomerModal">Add Employee</button>
+                            </div>
+                        </li>
+
+                    </ol>
+                    <div class="row">
+                        <div class="col-xl-3 col-md-6">
+                            <div class="card bg-primary text-white mb-4">
+                                <div class="card-body">
+                                    <h5 class="display-4" id="employeeCount">0</h5>
+                                    <p class="card-text">Total Employees</p>
+                                </div>
+                            </div>
+                        </div>
+
+
+                    </div>
+                    <!-- Edit Modal -->
+                    <div class="modal" id="editModal" tabindex="-1" role="dialog" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Employee</h5>
+                                    <button type="button" class="close" id="closeModalButton" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <form id="editForm" method="post" action="@Url.Action("UpdateEmployee", "Admin")" enctype="multipart/form-data">
+                                    <input type="hidden" name="id" id="employeeId" />
+                                    <div class="modal-body">
+                                        <div class="form-group">
+                                            <label for="employeeName">Name</label>
+                                            <input type="text" class="form-control" name="employeeName" id="employeeName" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="employeeEmail">Email</label>
+                                            <input type="email" class="form-control" name="employeeEmail" id="employeeEmail" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label for="employeeDesignation">Designation</label>
+                                            <input type="text" class="form-control" name="employeeDesignation" id="employeeDesignation" required />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Current Document 1:</label>
+                                            <span id="currentDocument1"></span>
+                                            <label for="DOCUMENT_1">Upload New Document 1</label>
+                                            <input type="file" class="form-control" name="DOCUMENT_1" id="DOCUMENT_1" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Current Document 2:</label>
+                                            <span id="currentDocument2"></span>
+                                            <label for="DOCUMENT_2">Upload New Document 2</label>
+                                            <input type="file" class="form-control" name="DOCUMENT_2" id="DOCUMENT_2" />
+                                        </div>
+                                        <div class="form-group">
+                                            <label>Current Document 3:</label>
+                                            <span id="currentDocument3"></span>
+                                            <label for="DOCUMENT_3">Upload New Document 3</label>
+                                            <input type="file" class="form-control" name="DOCUMENT_3" id="DOCUMENT_3" />
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+
+                                        <button type="submit" class="btn btn-primary">Save changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+
+
+
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="addCustomerModal" tabindex="-1" role="dialog" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addCustomerModalLabel">Add Employee</h5>
+                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                        <span aria-hidden="true">&times;</span>
+                                    </button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="addCustomerForm" enctype="multipart/form-data" method="post" action="/Admin/Fileupload">
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <label for="Employeename">Employee Name</label>
+                                                <input type="text" class="form-control" id="Employeename" name="Employeename" required>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="Employeeemail">Email Address</label>
+                                                <input type="email" class="form-control" id="Employeeemail" name="Employeeemail" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-md-6">
+                                                <label for="Employeedesignation">Designation</label>
+                                                <input type="text" class="form-control" id="Employeedesignation" name="Employeedesignation" required>
+                                            </div>
+                                            <div class="form-group col-md-6">
+                                                <label for="fileName">File Name</label>
+                                                <input type="text" class="form-control" id="fileName" name="fileName" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-md-12">
+                                                <label for="DOCUMENT_1">Emirates ID (PDF, Excel, Word)</label>
+                                                <input type="file" class="form-control" id="DOCUMENT_1" name="DOCUMENT_1" accept=".pdf, .doc, .docx, .xls, .xlsx" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-md-12">
+                                                <label for="DOCUMENT_2">Passport (PDF, Excel, Word)</label>
+                                                <input type="file" class="form-control" id="DOCUMENT_2" name="DOCUMENT_2" accept=".pdf, .doc, .docx, .xls, .xlsx" required>
+                                            </div>
+                                        </div>
+                                        <div class="form-row">
+                                            <div class="form-group col-md-12">
+                                                <label for="DOCUMENT_3">Visa Copy (PDF, Excel, Word)</label>
+                                                <input type="file" class="form-control" id="DOCUMENT_3" name="DOCUMENT_3" accept=".pdf, .doc, .docx, .xls, .xlsx" required>
+                                            </div>
+                                        </div>
+                                    </form>
+
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                    <button type="submit" form="addCustomerForm" class="btn btn-primary">Submit</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <div class="row">
+                        <div class="col-xl-6">
+                            @*<div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-area me-1"></i>
+                                        Area Chart Example
+                                    </div>
+                                    <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
+                                </div>*@
+                        </div>
+                        <div class="col-xl-6">
+                            @*<div class="card mb-4">
+                                    <div class="card-header">
+                                        <i class="fas fa-chart-bar me-1"></i>
+                                        Bar Chart Example
+                                    </div>
+                                    <div class="card-body"><canvas id="myBarChart" width="100%" height="40"></canvas></div>
+                                </div>*@
+                        </div>
+                    </div>
+
+                    <div class="card mb-4">
+                        @*<form method="post" action="Admin/EditDcoumnet">*@
+                        <div class="card-header">
+                            <i class="fas fa-table me-1"></i>
+                            Employee Details
+                        </div>
+                        <div class="card-body">
+                            <table id="datatablesSimple">
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>NAME</th>
+                                        <th>EMAIL</th>
+                                        <th>DESIGNATION</th>
+                                        <th>DOWNLOAD</th>
+                                        <th>ACTION</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (DataRow dr in dt.Rows)
+                                    {
+                                        <tr>
+                                            <td>@dr["EMPLOYEE_ID"].ToString()</td>
+                                            <td>@dr["EMPLOYEE_NAME"].ToString()</td>
+                                            <td>@dr["EMPLOYEE_EMAIL"].ToString()</td>
+                                            <td>@dr["EMPLOYEE_DESIGNATION"].ToString()</td>
+                                            <td>
+                                                <div class="btn-group" role="group">
+                                                    <a href="@Url.Action("DownloadFile", "Admin", new { fileName = dr["DOCUMENT_1"].ToString(), employeeName = dr["EMPLOYEE_NAME"].ToString() })"
+                                                       class="btn btn-primary btn-custom" style="min-width: 120px;">
+                                                        Passport
+                                                    </a>
+                                                    <a href="@Url.Action("DownloadFile", "Admin", new { fileName = dr["DOCUMENT_2"].ToString(), employeeName = dr["EMPLOYEE_NAME"].ToString() })"
+                                                       class="btn btn-primary btn-custom">
+                                                        Visa
+                                                    </a>
+                                                    <a href="@Url.Action("DownloadFile", "Admin", new { fileName = dr["DOCUMENT_3"].ToString(), employeeName = dr["EMPLOYEE_NAME"].ToString() })"
+                                                       class="btn btn-primary btn-custom">
+                                                        Emirates ID
+                                                    </a>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-secondary"
+                                                        onclick="openEditModal('@dr["EMPLOYEE_ID"].ToString()', '@dr["EMPLOYEE_NAME"].ToString()', '@dr["EMPLOYEE_EMAIL"].ToString()', '@dr["EMPLOYEE_DESIGNATION"].ToString()', '@dr["DOCUMENT_1"].ToString()', '@dr["DOCUMENT_2"].ToString()', '@dr["DOCUMENT_3"].ToString()')">
+                                                    Edit
+                                                </button>
+
+                                                <button type="button" class="btn btn-danger"
+                                                        onclick="confirmDelete('@dr["EMPLOYEE_ID"].ToString()')">
+                                                    Delete
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+
+                        </div>
+                        @*</form>
+                            </div>*@
+                    </div>
+                </div>
+            </main>
+            @*<p><span id="layoutAuthentication"></span></p>*@
+            <footer class="py-4 bg-light mt-auto">
+                <div class="container-fluid px-4">
+                    <div class="d-flex align-items-center justify-content-between small">
+
+
+                        <div>
+
+                            &middot;
+
+
+                        </div>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+    <script src="/js/scripts.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.8.0/Chart.min.js" crossorigin="anonymous"></script>
+    <script src="assets/demo/chart-area-demo.js"></script>
+    <script src="assets/demo/chart-bar-demo.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+    <script src="/js/datatables-simple-demo.js"></script>
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+
+    <script>
+        document.getElementById('addCustomerForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+            var formData = new FormData(this);
+            fetch('/Admin/Fileupload', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success',
+                            text: data.message
+                        }).then(() => {
+                            $('addCustomerModal').modal('hide');
+                            location.reload();
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message
+                        });
+                    }
+                })
+                .catch(error => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An unexpected error occurred.'
+                    });
+                });
+        });
+
+    </script>
+    <script>
+        //function getindex(documentName) {
+        //    // Make an AJAX request to get the decrypted file
+        //    fetch('/Admin/GetDocument?documentName=' + encodeURIComponent(documentName))
+        //        .then(response => {
+        //            if (!response.ok) {
+        //                throw new Error('Network response was not ok');
+        //            }
+        //            return response.blob(); // Get the response as a blob
+        //        })
+        //        .then(blob => {
+        //            // Create a link element
+        //            const link = document.createElement('a');
+        //            link.href = window.URL.createObjectURL(blob);
+        //            link.download = documentName; // Set the file name for download
+        //            link.click(); // Trigger the download
+        //        })
+        //        .catch(error => console.error('Error fetching the document:', error));
+        //}
+    </script>
+    @*<script>
+
+            $(document).ready(function () {
+                $("table tbody tr").click(function () {
+                    var employeeName = $(this).find("td:nth-child(2)").text();
+                    var employeeDesignation = $(this).find("td:nth-child(3)").text();
+                    var document1 = $(this).find("td:nth-child(4)").text();
+                    var document2 = $(this).find("td:nth-child(5)").text();
+                    var document3 = $(this).find("td:nth-child(6)").text();
+                    var decryptedContent1 = decryptFile(document1, document2);
+                    var decryptedContent2 = decryptFile(document1, document3);
+
+                    alert("Name: " + employeeName + "\nDesignation: " + employeeDesignation +
+                        "\nDecrypted Content 1: " + decryptedContent1 +
+                        "\nDecrypted Content 2: " + decryptedContent2);
+                });
+            });
+
+        </script>*@
+    <script>
+        function downloadFile(fileName, employeeName) {
+            fetch(`/Admin/DownloadFile?fileName=${fileName}&employeeName=${employeeName}`)
+                .then(response => {
+                    if (response.ok) {
+                        alert("File download started!");
+                        return response.blob();
+                    } else {
+                        alert("Error: " + response.statusText);
+                        throw new Error(response.statusText);
+                    }
+                })
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = url;
+                    a.download = fileName;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                })
+                .catch(error => {
+                    alert("Error: " + error.message);
+                });
+        }
+    </script>
+    <script>
+    const totalEmployees = @employeeCount;
+    let count = 0;
+    const duration = 9000;
+    const incrementTime = 240;
+    const totalIncrements = duration / incrementTime;
+    const incrementAmount = Math.ceil(totalEmployees / totalIncrements);
+const animateCount = () => {
+        const countDisplay = document.getElementById('employeeCount');
+        const interval = setInterval(() => {
+            count += incrementAmount;
+            if (count >= totalEmployees) {
+                count = totalEmployees;
+                clearInterval(interval);
+            }
+            countDisplay.textContent = count;
+        }, incrementTime);
+    };
+    animateCount();
+    </script>
+
+    <script>
+        function openEditModal(employeeId, employeeName, employeeEmail, employeeDesignation, document1, document2, document3) {
+            document.getElementById('employeeId').value = employeeId;
+            document.getElementById('employeeName').value = employeeName;
+            document.getElementById('employeeEmail').value = employeeEmail;
+            document.getElementById('employeeDesignation').value = employeeDesignation;
+            document.getElementById('currentDocument1').textContent = document1 ? document1 : 'No document uploaded';
+            document.getElementById('currentDocument2').textContent = document2 ? document2 : 'No document uploaded';
+            document.getElementById('currentDocument3').textContent = document3 ? document3 : 'No document uploaded';
+
+            $('#editModal').modal('show');
+        }
+        @if (TempData["SuccessMessage"] != null)
+    {
+        <text>
+            swal("Success!", "@TempData["SuccessMessage"]", "success");
+        </text>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <text>
+            swal("Error!", "@TempData["ErrorMessage"]", "error");
+        </text>
+    }
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const closeButton = document.getElementById('closeModalButton');
+            closeButton.addEventListener('click', function () {
+                $('#editModal').modal('hide');
+            });
+        });
+    </script>
+    <script>
+    function confirmDelete(id) {
+       swal({
+            title: "Are you sure?",
+            text: "Do you really want to delete this employee?",
+            icon: "warning",
+            buttons: true,
+            dangerMode: true,
+        })
+        .then((willDelete) => {
+            if (willDelete) {
+                window.location.href = '@Url.Action("DeleteEmployee", "Admin")' + '/' + id;
+            }
+        });
+    }
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <text>
+            swal("Success!", "@TempData["SuccessMessage"]", "success");
+        </text>
+    }
+
+    @if (ViewBag.ErrorMessage != null)
+    {
+        <text>
+            swal("Error!", "@ViewBag.ErrorMessage", "error");
+        </text>
+    }
+    </script>
+
+</body>
+</html>

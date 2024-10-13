@@ -1,0 +1,214 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width" />
+    <title>Login</title>
+    <link rel="stylesheet" href="~/Content/styles.css"> <!-- Link to the external CSS file -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body {
+            font-family: "Raleway", Helvetica, sans-serif;
+            font-size: 14px;
+            color: #404040;
+            background: #A50034;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+    .wrap {
+        margin: auto;
+        width: 90%; 
+        max-width: 270px;
+        height: auto; 
+        text-align: center;
+    }
+
+    .register-title {
+        margin-top: 0;
+        width: 100%; 
+        line-height: 43px;
+        font-size: 19px;
+        font-weight: 500;
+        color: #EEEEEE;
+        text-align: center;
+        text-shadow: 0 1px rgba(0, 0, 0, 0.3);
+        background-color: #3290B1;
+        box-shadow: inset 0 1px rgba(255, 255, 255, 0.1), inset 0 0 0 1px rgba(255, 255, 255, 0.05), 0 0 1px 1px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.3);
+        border-radius: 3px;
+    }
+
+        .register {
+            margin: 0 auto;
+            width: 100%;
+            padding: 20px;
+            background: #87CEEB;
+            border-radius: 3px;
+            box-shadow: 0 0 1px 1px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+    input {
+        font-family: inherit;
+        font-size: inherit;
+        color: inherit;
+        box-sizing: border-box;
+    }
+
+    .register-input {
+        display: block;
+        width: 100%;
+        height: 38px;
+        margin-top: 2px;
+        font-weight: 500;
+        background: none;
+        border: 0;
+        border-bottom: 1px solid #d8d8d8;
+    }
+
+    .register-input:focus {
+        border-color: #1e9ce6;
+        outline: 0;
+    }
+
+    .register-button {
+        display: block;
+        width: 100%;
+        height: 42px;
+        margin-top: 25px;
+        font-size: 16px;
+        font-weight: bold;
+        color: #494d59;
+        text-align: center;
+        text-shadow: 0 1px rgba(255, 255, 255, 0.5);
+        background: #fcfcfc;
+        border: 1px solid;
+        border-color: #d8d8d8 #d1d1d1 #c3c3c3;
+        border-radius: 2px;
+        cursor: pointer;
+        background-image: linear-gradient(to bottom, #fefefe, #eeeeee);
+        box-shadow: inset 0 -1px rgba(0, 0, 0, 0.03), 0 1px rgba(0, 0, 0, 0.04);
+    }
+
+    .register-button:active {
+        background: #eee;
+        border-color: #c3c3c3 #d1d1d1 #d8d8d8;
+        background-image: linear-gradient(to bottom, #eeeeee, #fcfcfc);
+        box-shadow: inset 0 1px rgba(0, 0, 0, 0.03);
+    }
+
+    .register-button:focus {
+        outline: 0;
+    }
+
+    .register-switch {
+        height: 32px;
+        margin-bottom: 15px;
+        padding: 4px;
+        background: #78A781;
+        border-radius: 2px;
+        box-shadow: inset 0 1px rgba(0, 0, 0, 0.05), inset 1px 0 rgba(0, 0, 0, 0.02), inset -1px 0 rgba(0, 0, 0, 0.02);
+    }
+
+    .register-switch-input {
+        display: none;
+    }
+
+    .register-switch-label {
+        float: left;
+        width: 50%;
+        line-height: 32px;
+        color: white;
+        text-align: center;
+        text-shadow: 0 -1px rgba(0, 0, 0, 0.2);
+        cursor: pointer;
+    }
+
+    .register-switch-input:checked + .register-switch-label {
+        font-weight: 500;
+        color: #434248;
+        text-shadow: 0 1px rgba(255, 255, 255, 0.5);
+        background: white;
+        border-radius: 2px;
+        background-image: linear-gradient(to bottom, #fefefe, #eeeeee);
+        box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.1);
+    }
+
+    :-moz-placeholder {
+        color: #aaa;
+        font-weight: 300;
+    }
+
+    ::-moz-placeholder {
+        color: #aaa;
+        font-weight: 300;
+        opacity: 1;
+    }
+
+    ::-webkit-input-placeholder {
+        color: #aaa;
+        font-weight: 300;
+    }
+
+    :-ms-input-placeholder {
+        color: #aaa;
+        font-weight: 300;
+    }
+
+    ::-moz-focus-inner {
+        border: 0;
+        padding: 0;
+    }
+
+    /* Responsive Styles */
+    @@media (max-width: 480px) {
+        .wrap {
+            width: 90%;
+        }
+
+        .register-title {
+            font-size: 16px; 
+            line-height: 40px;
+        }
+
+        .register-input {
+            height: 36px; 
+        }
+
+        .register-button {
+            height: 40px; 
+            font-size: 14px; 
+        }
+
+        .register-switch-label {
+            font-size: 12px; 
+        }
+    }
+    </style>
+
+
+</head>
+<body>
+    <div class="wrap">
+        <h1 class="register-title">Welcome</h1>
+        @if (ViewBag.error != null)
+        {
+    <div class="alert alert-danger">
+        @ViewBag.error
+    </div>}
+        <form class="register" method="post" action="/Home/login">
+            <input type="text" class="register-input" id="Username" name="Username" placeholder="Username" required>
+            <input type="password" class="register-input" id="Password" name="Password" placeholder="Password" required>
+            <input type="submit" value="Submit" class="register-button">
+        </form>
+    </div>
+</body>
+</html>
